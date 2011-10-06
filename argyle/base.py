@@ -38,14 +38,15 @@ def upload_template(filename, destination, context=None,
             destination += sep + os.path.basename(filename)
     # Process template
     loaders = []
-    for pth in getattr(env, 'ARGYLE_TEMPLATE_DIRS', ()):
-        loaders.append(FileSystemLoader(pth))
+    template_dirs = getattr(env, 'ARGYLE_TEMPLATE_DIRS', ())
+    if template_dirs:
+        loaders.append(FileSystemLoader(template_dirs))
     loaders.append(PackageLoader('argyle'))
     jenv = Environment(loader=ChoiceLoader(loaders))
     context = context or {}
     env_context = env.copy()
     env_context.update(context)
-    text = jenv.get_template(filename).render(env_context)
+    text = jenv.get_or_select_template(filename).render(env_context)
     # Back up original file
     if backup and files.exists(destination):
         func("cp %s{,.bak}" % destination)
