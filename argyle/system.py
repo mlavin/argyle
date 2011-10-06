@@ -2,7 +2,7 @@ from fabric.api import put, sudo, task
 
 
 @task
-def install_packages_from_list(*packages):
+def install_packages(*packages):
     """Install apt packages from a list."""
 
     sudo(u"apt-get install -y %s" % u" ".join(packages))
@@ -15,7 +15,7 @@ def install_packages_from_file(file_name):
     with open(file_name) as f:
         packages = f.readlines()
     packages = map(lambda x: x.strip('\n\r'), packages)
-    install_packages_from_list(*packages)
+    install_packages(*packages)
 
 
 @task

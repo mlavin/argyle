@@ -2,7 +2,7 @@ import os
 from StringIO import StringIO
 
 from fabric.api import env, hide, put, run, settings, sudo
-from fabric.files import exists
+from fabric.contrib import files
 from fabric.operations import _prefix_commands, _prefix_env_vars
 from jinja2 import ChoiceLoader, Environment, FileSystemLoader, PackageLoader
 
@@ -47,7 +47,7 @@ def upload_template(filename, destination, context=None,
     env_context.update(context)
     text = jenv.get_template(filename).render(env_context)
     # Back up original file
-    if backup and exists(destination):
+    if backup and files.exists(destination):
         func("cp %s{,.bak}" % destination)
     # Upload the file.
     put(

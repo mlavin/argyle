@@ -6,6 +6,7 @@ Vagrant.
 
 from fabric.api import env, run, task
 
+import argyle.nginx
 import argyle.system
 
 
