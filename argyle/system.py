@@ -80,10 +80,3 @@ def restart_service(name):
     """Restart an init.d service."""
 
     service_command(name, u"restart")
-
-
-@task
-def supervisor_command(command):
-    """Run a supervisorctl command."""
-
-    sudo(u"supervisorctl %s" % command)
