@@ -1,5 +1,10 @@
-from fabric.api import env
+import os
+from StringIO import StringIO
+
+from fabric.api import env, hide, put, run, settings, sudo
+from fabric.files import exists
 from fabric.operations import _prefix_commands, _prefix_env_vars
+from jinja2 import ChoiceLoader, Environment, FileSystemLoader, PackageLoader
 
 
 def sshagent_run(cmd):
@@ -21,3 +26,33 @@ def sshagent_run(cmd):
         return local(
             u"ssh -A %s@%s '%s'" % (env.user, env.host_string, wrapped_cmd)
         )
+
+
+def upload_template(filename, destination, context=None,
+    use_sudo=False, backup=True, mode=None):
+    func = use_sudo and sudo or run
+    # Normalize destination to be an actual filename, due to using StringIO
+    with settings(hide('everything'), warn_only=True):
+        if func('test -d %s' % destination).succeeded:
+            sep = "" if destination.endswith('/') else "/"
+            destination += sep + os.path.basename(filename)
+    # Process template
+    loaders = []
+    for pth in getattr(env, 'ARGYLE_TEMPLATE_DIRS', ()):
+        loaders.append(FileSystemLoader(pth))
+    loaders.append(PackageLoader('argyle'))
+    jenv = Environment(loader=ChoiceLoader(loaders))
+    context = context or {}
+    env_context = env.copy()
+    env_context.update(context)
+    text = jenv.get_template(filename).render(env_context)
+    # Back up original file
+    if backup and exists(destination):
+        func("cp %s{,.bak}" % destination)
+    # Upload the file.
+    put(
+        local_path=StringIO(text),
+        remote_path=destination,
+        use_sudo=use_sudo,
+        mode=mode
+    )

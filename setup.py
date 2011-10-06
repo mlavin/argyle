@@ -22,7 +22,7 @@ setup(
     url='https://github.com/mlavin/argyle',
     license='BSD',
     description=u' '.join(__import__('argyle').__doc__.splitlines()).strip(),
-    install_requires=['fabric>=1.1.0', ],
+    install_requires=['fabric>=1.1.0', 'jinja2', ],
     classifiers=[
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
         'Intended Audience :: Developers',

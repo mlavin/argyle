@@ -2,7 +2,7 @@ from fabric.api import put, sudo, task
 
 
 @task
-def install_packages_from_list(packages):
+def install_packages_from_list(*packages):
     """Install apt packages from a list."""
 
     sudo(u"apt-get install -y %s" % u" ".join(packages))
@@ -15,7 +15,7 @@ def install_packages_from_file(file_name):
     with open(file_name) as f:
         packages = f.readlines()
     packages = map(lambda x: x.strip('\n\r'), packages)
-    install_packages_from_list(packages)
+    install_packages_from_list(*packages)
 
 
 @task
@@ -49,8 +49,8 @@ def create_user(name, groups=None, key_file=None):
     sudo(u"useradd -m %s -s /bin/bash %s" % (groups, name))
     sudo(u"passwd -d %s" % name)
     if key_file:
-        sudo(u"mkdir /home/%s/.ssh" % name)
-        put(keyfile, u"/home/%s/.ssh/authorized_keys" % name, use_sudo=True)
+        sudo(u"mkdir -p /home/%s/.ssh" % name)
+        put(key_file, u"/home/%s/.ssh/authorized_keys" % name, use_sudo=True)
         sudo(u"chown -R %(name)s /home/%(name)s/.ssh" % {'name': name})
 
 
