@@ -14,9 +14,10 @@ def remove_default_site():
 
 
 @task
-def upload_nginx_site_conf(site_name, template_name=u"nginx/site.conf", context=None, enable=True):
+def upload_nginx_site_conf(site_name, template_name=None, context=None, enable=True):
     """Upload Nginx site configuration from a template."""
     
+    template_name = template_name or [u'nginx/%s.conf' % site_name, u'nginx/site.conf']
     site_available = u'/etc/nginx/sites-available/%s' % site_name
     upload_template(template_name, site_available, context=context, use_sudo=True)
     if enable:
