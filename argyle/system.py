@@ -1,4 +1,3 @@
-import argyle
 from fabric.api import put, sudo, task, env
 
 
