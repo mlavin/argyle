@@ -20,11 +20,15 @@ def sshagent_run(cmd):
     try:
         host, port = env.host_string.split(':')
         return local(
-            u"ssh -p %s -A %s@%s '%s'" % (port, env.user, host, wrapped_cmd)
+            u"ssh -p %s -A -o StrictHostKeyChecking=no %s@%s '%s'" % (
+                port, env.user, host, wrapped_cmd
+            )
         )
     except ValueError:
         return local(
-            u"ssh -A %s@%s '%s'" % (env.user, env.host_string, wrapped_cmd)
+            u"ssh -A -o StrictHostKeyChecking=no %s@%s '%s'" % (
+                env.user, env.host_string, wrapped_cmd
+            )
         )
 
 
