@@ -52,9 +52,17 @@ Again this is pretty simple. It runs a `safe-upgrade` on the remote system.
 add_ppa
 -----------------------------------
 
-Adds a personal package archive and updates the sources. This requires that
+Adds a personal package archive (PPA) and updates the sources. This requires that
 python-software-properties is installed on the system.
 
+add_ppas_from_file
+-----------------------------------
+
+A common use case for adding PPAs is to add them from a list of PPAs 
+from a file. `add_ppas_from_file` is a thin wrapper around `add_ppa`
+which takes a filename and adds the listed PPAs. This file should contain 
+single package name per line. The file is read from the local filesystem not the
+remote.
 
 create_user
 -----------------------------------
