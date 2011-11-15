@@ -30,7 +30,7 @@ def upgrade_apt_packages():
     """Safe upgrade of all packages."""
 
     update_apt_sources()
-    sudo(u"apt-get safe-upgrade -y")
+    sudo(u"apt-get upgrade -y")
 
 
 @task
@@ -60,8 +60,8 @@ def service_command(name, command):
 
     service_command_template = getattr(env, 'ARGYLE_SERVICE_COMMAND_TEMPLATE',
                                        u'/etc/init.d/%(name)s %(command)s')
-    sudo(env.service_command_template % {'name': name,
-                                         'command': command})
+    sudo(service_command_template % {'name': name,
+                                     'command': command})
 
 
 @task
