@@ -5,8 +5,8 @@ from fabric.api import sudo, task
 def create_db_user(username, password=None, flags=None):
     """Create a databse user."""
 
-    flags = flags or u''
-    sudo(u'createuser -D -A -R %s' % username, user=u'postgres')
+    flags = flags or u'-D -A -R'
+    sudo(u'createuser %s %s' % (flags, username), user=u'postgres')
     if password:
         change_db_user_password(username, password)
 

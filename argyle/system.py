@@ -1,6 +1,12 @@
 from fabric.api import put, sudo, task, env
 
 
+def _read_lines_from_file(file_name):
+    with open(file_name) as f:
+        packages = f.readlines()
+    return map(lambda x: x.strip('\n\r'), packages)
+
+
 @task
 def install_packages(*packages):
     """Install apt packages from a list."""
@@ -12,10 +18,7 @@ def install_packages(*packages):
 def install_packages_from_file(file_name):
     """Install apt packages from a file list."""
 
-    with open(file_name) as f:
-        packages = f.readlines()
-    packages = map(lambda x: x.strip('\n\r'), packages)
-    install_packages(*packages)
+    install_packages(*_read_lines_from_file(file_name))
 
 
 @task
@@ -30,7 +33,7 @@ def upgrade_apt_packages():
     """Safe upgrade of all packages."""
 
     update_apt_sources()
-    sudo(u"apt-get safe-upgrade -y")
+    sudo(u"apt-get upgrade -y")
 
 
 @task
@@ -39,6 +42,14 @@ def add_ppa(name):
 
     sudo(u"add-apt-repository %s" % name)
     update_apt_sources()
+
+
+@task
+def add_ppas_from_file(file_name):
+    """Add personal package archive from a file list."""
+
+    for ppa in _read_lines_from_file(file_name):
+        add_ppa(ppa)
 
 
 @task
@@ -60,8 +71,8 @@ def service_command(name, command):
 
     service_command_template = getattr(env, 'ARGYLE_SERVICE_COMMAND_TEMPLATE',
                                        u'/etc/init.d/%(name)s %(command)s')
-    sudo(env.service_command_template % {'name': name,
-                                         'command': command})
+    sudo(service_command_template % {'name': name,
+                                     'command': command})
 
 
 @task

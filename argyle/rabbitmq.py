@@ -25,7 +25,7 @@ def create_vhost(name):
 
 
 @task
-def set_vhost_permissions(vhost, username, permissions='".*" ".*" ".*"')
+def set_vhost_permissions(vhost, username, permissions='".*" ".*" ".*"'):
     """Set permssions for a user on a given vhost."""
 
     rabbitmq_command(u'set_permissions -p %s %s %s' % (vhost, username, permissions))
