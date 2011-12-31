@@ -25,6 +25,6 @@ def remove_supervisor_app(app_name):
     """Remove Supervisor app configuration."""
 
     app = u'/etc/supervisor/conf.d/%s.conf' % app_name
-    if files.exists(site):
+    if files.exists(app):
         sudo(u'rm %s' % app)
         supervisor_command(u'update')
