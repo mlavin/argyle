@@ -50,13 +50,13 @@ def create_db(name, owner=None, encoding=u'UTF-8'):
 
 
 @task
-def upload_pg_hba_conf(filename='postgres/pg_hba.conf',
-    pg_version=None, pg_cluster='main', restart=True):
+def upload_pg_hba_conf(template_name=None, pg_version=None, pg_cluster='main', restart=True):
     """
     Upload configuration for pg_hba.conf
     If the version is not given it will be guessed.
     """
 
+    template_name = template_name or u'postgres/pg_hba.conf'
     if not pg_version:
         version_regex = re.compile(r'\(PostgreSQL\) (?P<major>\d)\.(?P<minor>\d)\.(?P<bugfix>\d)')
         with hide('running', 'stdout', 'stderr'):
@@ -70,6 +70,6 @@ def upload_pg_hba_conf(filename='postgres/pg_hba.conf',
             abort(u"Error: Could not determine Postgres version of the server.")
     config = {'version': pg_version, 'cluster': pg_cluster}
     destination = u'/etc/postgresql/%(version)s/%(cluster)s/pg_hba.conf' % config
-    upload_template(filename, destination, use_sudo=True)
+    upload_template(template_name, destination, use_sudo=True)
     if restart:
         restart_service(u'postgresql')
