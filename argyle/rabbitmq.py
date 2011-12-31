@@ -32,20 +32,22 @@ def set_vhost_permissions(vhost, username, permissions='".*" ".*" ".*"'):
 
 
 @task
-def upload_rabbitmq_environment_conf(template_name=None, context=None):
+def upload_rabbitmq_environment_conf(template_name=None, context=None, restart=True):
     """Upload RabbitMQ environment configuration from a template."""
     
     template_name = template_name or u'rabbitmq/rabbitmq-env.conf'
     destination = u'/etc/rabbitmq/rabbitmq-env.conf'
     upload_template(template_name, destination, context=context, use_sudo=True)
-    restart_service(u'rabbitmq')
+    if restart:
+        restart_service(u'rabbitmq')
 
 
 @task
-def upload_rabbitmq_conf(template_name=None, context=None):
+def upload_rabbitmq_conf(template_name=None, context=None, restart=True):
     """Upload RabbitMQ configuration from a template."""
     
     template_name = template_name or u'rabbitmq/rabbitmq.config'
     destination = u'/etc/rabbitmq/rabbitmq.config'
     upload_template(template_name, destination, context=context, use_sudo=True)
-    restart_service(u'rabbitmq')
+    if restart:
+        restart_service(u'rabbitmq')
