@@ -13,13 +13,17 @@ def create_db_user(username, password=None, flags=None):
 
 
 @task
-def excute_query(query, user='postgres', db=None, flags=None):
+def excute_query(query, db=None, flags=None, use_sudo=False):
     """Execute remote psql query."""
 
     flags = flags or u''
     if db:
         flags = u"%s -d %s" % (flags, db)
-    sudo('psql %s -c "%s"' % (flags, query), user=user)
+    command = u'psql %s -c "%s"' % (flags, query)
+    if use_sudo:
+        sudo(command, user='postgres')
+    else:    
+        run(command)
 
 
 @task
