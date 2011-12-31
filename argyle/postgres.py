@@ -31,7 +31,7 @@ def change_db_user_password(username, password):
     """Change a db user's password."""
 
     sql = "ALTER USER %s WITH PASSWORD '%s'" % (username, password)
-    excute_query(sql)
+    excute_query(sql, use_sudo=True)
 
 
 @task
