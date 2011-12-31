@@ -2,6 +2,7 @@ from argyle.base import upload_template
 from fabric.api import sudo, task
 
 
+@task
 def create_db_user(username, password=None, flags=None):
     """Create a databse user."""
 
@@ -11,13 +12,25 @@ def create_db_user(username, password=None, flags=None):
         change_db_user_password(username, password)
 
 
+@task
+def excute_query(query, user='postgres', db=None, flags=None):
+    """Execute remote psql query."""
+
+    flags = flags or u''
+    if db:
+        flags = u"%s -d %s" % (flags, db)
+    sudo('psql %s -c "%s"' % (flags, query), user=user)
+
+
+@task
 def change_db_user_password(username, password):
     """Change a db user's password."""
 
     sql = "ALTER USER %s WITH PASSWORD '%s'" % (username, password)
-    sudo('psql -c "%s"' % sql, user='postgres')
+    excute_query(sql)
 
 
+@task
 def create_db(name, owner=None, encoding=u'UTF-8'):
     """Create a Postgres database."""
 
