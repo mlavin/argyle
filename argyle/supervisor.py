@@ -1,5 +1,6 @@
 from argyle.base import upload_template
 from fabric.api import sudo, task
+from fabric.contrib import files
 
 
 @task
@@ -17,3 +18,13 @@ def upload_supervisor_app_conf(app_name, template_name=None, context=None):
     destination = u'/etc/supervisor/conf.d/%s.conf' % app_name
     upload_template(template_name, destination, context=context, use_sudo=True)
     supervisor_command(u'update')
+
+
+@task
+def remove_supervisor_app(app_name):
+    """Remove Supervisor app configuration."""
+
+    app = u'/etc/supervisor/conf.d/%s.conf' % app_name
+    if files.exists(site):
+        sudo(u'rm %s' % app)
+        supervisor_command(u'update')
