@@ -67,7 +67,7 @@ def create_user(name, groups=None, key_file=None):
 
 @task
 def service_command(name, command):
-    """Run an init.d command."""
+    """Run an init.d/upstart command."""
 
     service_command_template = getattr(env, 'ARGYLE_SERVICE_COMMAND_TEMPLATE',
                                        u'/etc/init.d/%(name)s %(command)s')
