@@ -85,7 +85,9 @@ def add_sources_from_file(file_name, update=True):
 
     key_regex = re.compile(r'(?P<source>[^()]*)(\s+\((?P<key>.*)\))?$')
     for line in _read_lines_from_file(file_name):
-        add_apt_source(**key_regex.match(line).groupdict(), update=False)
+        kwargs = key_regex.match(line).groupdict()
+        kwargs['update'] = False
+        add_apt_source(**kwargs)
     if update:
         update_apt_sources()
 
