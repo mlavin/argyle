@@ -1,4 +1,7 @@
+import re
+
 from fabric.api import put, sudo, task, env
+from fabric.contrib import files
 
 
 def _read_lines_from_file(file_name):
@@ -37,19 +40,54 @@ def upgrade_apt_packages():
 
 
 @task
-def add_ppa(name):
+def add_ppa(name, update=True):
     """Add personal package archive."""
 
     sudo(u"add-apt-repository %s" % name)
-    update_apt_sources()
+    if update:
+        update_apt_sources()
 
 
 @task
-def add_ppas_from_file(file_name):
+def add_ppas_from_file(file_name, update=True):
     """Add personal package archive from a file list."""
 
     for ppa in _read_lines_from_file(file_name):
-        add_ppa(ppa)
+        add_ppa(ppa, update=False)
+    if update:
+        update_apt_sources()
+
+
+@task
+def add_apt_source(source, key=None, update=True):
+    """Adds source url to apt sources.list. Optional to pass the key url."""
+
+    # Make a backup of list
+    sudo("cp %s{,.bak}" % source_list)
+    files.append(source_list, source, use_sudo=True)
+    if key:
+        # Fecth key from url and add
+        sudo(u"wget -q %s -O - | sudo apt-key add -" % key)
+    if update:
+        update_apt_sources()
+
+
+@task
+def add_sources_from_file(file_name, update=True):
+    """
+    Add source urls from a file list.
+    The file should contain the source line to add followed by the
+    key url, if any, enclosed in parentheses.
+
+    Ex:
+    deb http://example.com/deb lucid main (http://example.com/key)
+    """
+
+    key_regex = re.compile(r'(?P<source>[^()]*)(\s+\((?P<key>.*)\))?$')
+    for line in _read_lines_from_file(file_name):
+        add_apt_source(**key_regex.match(line).groupdict(), update=False)
+    if update:
+        update_apt_sources()
 
 
 @task
