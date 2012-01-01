@@ -1,7 +1,7 @@
 import os
 from StringIO import StringIO
 
-from fabric.api import env, hide, put, run, settings, sudo
+from fabric.api import env, hide, local, put, run, settings, sudo
 from fabric.contrib import files
 from fabric.operations import _prefix_commands, _prefix_env_vars
 from jinja2 import ChoiceLoader, Environment, FileSystemLoader, PackageLoader
