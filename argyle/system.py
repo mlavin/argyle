@@ -63,6 +63,7 @@ def add_apt_source(source, key=None, update=True):
     """Adds source url to apt sources.list. Optional to pass the key url."""
 
     # Make a backup of list
+    source_list = u'/etc/apt/sources.list'
     sudo("cp %s{,.bak}" % source_list)
     files.append(source_list, source, use_sudo=True)
     if key:
