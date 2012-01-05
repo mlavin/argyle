@@ -113,7 +113,7 @@ def service_command(name, command):
     service_command_template = getattr(env, 'ARGYLE_SERVICE_COMMAND_TEMPLATE',
                                        u'/etc/init.d/%(name)s %(command)s')
     sudo(service_command_template % {'name': name,
-                                     'command': command})
+                                     'command': command}, pty=False)
 
 
 @task
