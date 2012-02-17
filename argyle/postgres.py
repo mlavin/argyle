@@ -3,6 +3,7 @@ import re
 from argyle.base import upload_template
 from argyle.system import restart_service
 from fabric.api import abort, hide, run, sudo, task
+from fabric.contrib.console import confirm
 
 
 @task
@@ -78,3 +79,16 @@ def detect_version():
     if not pg_version:
         abort(u"Error: Could not determine Postgres version of the server.")
     return pg_version
+
+
+@task
+def reset_cluster(pg_cluster='main', pg_version=None, encoding=u'UTF-8'):
+    """Drop and restore a given cluster."""
+    version = pg_version or detect_version()
+    warning = u'You are about to drop the %s cluster. This cannot be undone. Are you sure you want to continue?' % pg_cluster
+    if confirm(warning, default=False):
+        config = {'version': version, 'cluster': pg_cluster, 'encoding': encoding}
+        sudo(u'pg_dropcluster --stop %(version)s %(cluster)s' % config, user='postgres')
+        sudo(u'pg_createcluster --start -e %(encoding)s %(version)s %(cluster)s' % config, user='postgres') 
+    else:
+        abort(u"Error: Could not determine Postgres version of the server.")
