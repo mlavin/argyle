@@ -114,7 +114,7 @@ def create_user(name, groups=None, key_file=None):
     if not user_exists(name):
         for group in groups:
             if not group_exists(group):
-                sudo(u"addgroup %" % group)
+                sudo(u"addgroup %s" % group)
         groups = groups and u'-G %s' % u','.join(groups) or ''
         sudo(u"useradd -m %s -s /bin/bash %s" % (groups, name))
         sudo(u"passwd -d %s" % name)
