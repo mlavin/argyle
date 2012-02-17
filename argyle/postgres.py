@@ -91,4 +91,4 @@ def reset_cluster(pg_cluster='main', pg_version=None, encoding=u'UTF-8'):
         sudo(u'pg_dropcluster --stop %(version)s %(cluster)s' % config, user='postgres')
         sudo(u'pg_createcluster --start -e %(encoding)s %(version)s %(cluster)s' % config, user='postgres') 
     else:
-        abort(u"Error: Could not determine Postgres version of the server.")
+        abort(u"Droping %s cluster aborted by user input." % pg_cluster)
