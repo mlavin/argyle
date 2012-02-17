@@ -57,19 +57,24 @@ def upload_pg_hba_conf(template_name=None, pg_version=None, pg_cluster='main', r
     """
 
     template_name = template_name or u'postgres/pg_hba.conf'
-    if not pg_version:
-        version_regex = re.compile(r'\(PostgreSQL\) (?P<major>\d)\.(?P<minor>\d)\.(?P<bugfix>\d)')
-        with hide('running', 'stdout', 'stderr'):
-            output = run('psql --version')
-        match = version_regex.search(output)
-        if match:
-            result = match.groupdict()
-            if 'major' in result and 'minor' in result:
-                pg_version = u'%(major)s.%(minor)s' % result
-        if not pg_version:
-            abort(u"Error: Could not determine Postgres version of the server.")
-    config = {'version': pg_version, 'cluster': pg_cluster}
+    version = pg_version or detect_version()
+    config = {'version': version, 'cluster': pg_cluster}
     destination = u'/etc/postgresql/%(version)s/%(cluster)s/pg_hba.conf' % config
     upload_template(template_name, destination, use_sudo=True)
     if restart:
         restart_service(u'postgresql')
+
+
+def detect_version():
+    """Parse the output of psql to detect Postgres version."""
+    version_regex = re.compile(r'\(PostgreSQL\) (?P<major>\d)\.(?P<minor>\d)\.(?P<bugfix>\d)')
+    with hide('running', 'stdout', 'stderr'):
+        output = run('psql --version')
+    match = version_regex.search(output)
+    if match:
+        result = match.groupdict()
+        if 'major' in result and 'minor' in result:
+            pg_version = u'%(major)s.%(minor)s' % result
+    if not pg_version:
+        abort(u"Error: Could not determine Postgres version of the server.")
+    return pg_version
