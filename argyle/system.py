@@ -1,6 +1,6 @@
 import re
 
-from fabric.api import put, sudo, task, env
+from fabric.api import put, sudo, task, env, hide, settings, run
 from fabric.contrib import files
 
 
@@ -8,6 +8,20 @@ def _read_lines_from_file(file_name):
     with open(file_name) as f:
         packages = f.readlines()
     return map(lambda x: x.strip('\n\r'), packages)
+
+
+def user_exists(username):
+    exists = False
+    with settings(hide('everything'), warn_only=True):
+        exists = run(u"grep ^%s /etc/passwd" % username)
+    return exists
+
+
+def group_exists(name):
+    exists = False
+    with settings(hide('everything'), warn_only=True):
+        exists = run(u"grep ^%s /etc/group" % name)
+    return exists
 
 
 @task
@@ -97,9 +111,13 @@ def add_sources_from_file(file_name, update=True):
 def create_user(name, groups=None, key_file=None):
     """Create a user. Adds a key file to authorized_keys if given."""
 
-    groups = groups and u'-G %s' % u','.join(groups) or ''
-    sudo(u"useradd -m %s -s /bin/bash %s" % (groups, name))
-    sudo(u"passwd -d %s" % name)
+    if not user_exists(name):
+        for group in groups:
+            if not group_exists(group):
+                sudo(u"addgroup %" % group)
+        groups = groups and u'-G %s' % u','.join(groups) or ''
+        sudo(u"useradd -m %s -s /bin/bash %s" % (groups, name))
+        sudo(u"passwd -d %s" % name)
     if key_file:
         sudo(u"mkdir -p /home/%s/.ssh" % name)
         put(key_file, u"/home/%s/.ssh/authorized_keys" % name, use_sudo=True)
