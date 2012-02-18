@@ -14,6 +14,8 @@ Contents
     motivation.rst
     base.rst
     system.rst
+    settings.rst
+    changelog.rst
 
 
 

@@ -1,7 +1,7 @@
 Base Functions
 ======================================
 
-`argyle.base` contains functions which extend the Fabric api to make the rest
+``argyle.base`` contains functions which extend the Fabric api to make the rest
 of the Argyle framework work.
 
 
@@ -21,6 +21,8 @@ and `paramiko issue <https://bugs.launchpad.net/paramiko/+bug/483697>`_ for addi
 support for agent forwarding.
 
 
+.. _upload_template:
+
 upload_template
 -----------------------------------
 
@@ -36,4 +38,5 @@ Python string formatting or Jinja2. Argyle uses this same idea but with a few di
 
 Argyle ships with templates which are loaded using `jinja2.PackageLoader 
 <http://jinja.pocoo.org/docs/api/#jinja2.PackageLoader>`_. You can override these
-template by defining `ARGYLE_TEMPLATE_DIRS` as a tuple of template locations.
+template by defining :ref:`env.ARGYLE_TEMPLATE_DIRS <ARGYLE_TEMPLATE_DIRS>` 
+as a tuple of template locations.
