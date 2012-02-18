@@ -14,6 +14,7 @@ def supervisor_command(command):
 def upload_supervisor_app_conf(app_name, template_name=None, context=None):
     """Upload Supervisor app configuration from a template."""
     
+    context = context or {'app_name': app_name}
     template_name = template_name or [u'supervisor/%s.conf' % app_name, u'supervisor/base.conf']
     destination = u'/etc/supervisor/conf.d/%s.conf' % app_name
     upload_template(template_name, destination, context=context, use_sudo=True)
