@@ -11,7 +11,7 @@ Requirements
 - Fabric >= 1.1
 - Jinja2 >= 2.3
 
-These tasks were written primarily for deployments on Ubuntu Linux 10.04 LTS. Your
+These tasks were written primarily for deployments on Ubuntu Linux. Your
 mileage may vary with other operating systems and flavors of Linux.
 
 
