@@ -147,7 +147,7 @@ class HbaConfigTest(PostgresTest):
             postgres.upload_pg_hba_conf(pg_cluster='other')
             self.assertTemplateDesination(u'/etc/postgresql/9.1/other/pg_hba.conf')
 
-    def test_set_version(self):
+    def test_configure_version(self):
         "Version is used and not detected if given."
         with patch('argyle.postgres.detect_version') as version:
             postgres.upload_pg_hba_conf(pg_version='8.4')
@@ -161,6 +161,59 @@ class HbaConfigTest(PostgresTest):
             postgres.upload_pg_hba_conf(restart=False)
             restart_service = self.mocks['restart_service']
             self.assertFalse(restart_service.called)
+
+
+class ResetClusterTest(PostgresTest):
+    "Drop and restore cluser on the remote."
+
+    def test_requires_confirmation(self):
+        "User must confirm the drop or it will be aborted."
+        with patch('argyle.postgres.confirm') as confirm:
+            with patch('argyle.postgres.abort') as abort:
+                confirm.return_value = False
+                postgres.reset_cluster()
+                self.assertFalse(self.mocks['sudo'].called)
+                self.assertTrue(abort.called)
+
+    def test_default_reset(self):
+        "Reset default cluster. Version must be detected."
+        with patch('argyle.postgres.confirm') as confirm:
+            with patch('argyle.postgres.detect_version') as version:
+                confirm.return_value = True
+                version.return_value = '9.1'
+                postgres.reset_cluster()
+                self.assertSudoCommand('pg_dropcluster --stop 9.1 main')
+                self.assertSudoCommand('pg_createcluster --start -e UTF-8 9.1 main')
+
+    def test_configure_version(self):
+        "Use given version without detection if given."
+        with patch('argyle.postgres.confirm') as confirm:
+            with patch('argyle.postgres.detect_version') as version:
+                confirm.return_value = True
+                postgres.reset_cluster(pg_version='8.4')
+                self.assertSudoCommand('pg_dropcluster --stop 8.4 main')
+                self.assertSudoCommand('pg_createcluster --start -e UTF-8 8.4 main')
+                self.assertFalse(version.called)
+
+    def test_configure_cluster(self):
+        "Use non-main cluster if given."
+        with patch('argyle.postgres.confirm') as confirm:
+            with patch('argyle.postgres.detect_version') as version:
+                confirm.return_value = True
+                version.return_value = '9.1'
+                postgres.reset_cluster(pg_cluster='other')
+                self.assertSudoCommand('pg_dropcluster --stop 9.1 other')
+                self.assertSudoCommand('pg_createcluster --start -e UTF-8 9.1 other')
+
+    def test_configure_encoding(self):
+        "Use given encoding when creating cluster."
+        with patch('argyle.postgres.confirm') as confirm:
+            with patch('argyle.postgres.detect_version') as version:
+                confirm.return_value = True
+                version.return_value = '9.1'
+                postgres.reset_cluster(encoding='LATIN1')
+                self.assertSudoCommand('pg_dropcluster --stop 9.1 main')
+                self.assertSudoCommand('pg_createcluster --start -e LATIN1 9.1 main')
 
 
 if __name__ == '__main__':
