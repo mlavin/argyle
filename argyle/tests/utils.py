@@ -28,10 +28,33 @@ class ArgyleTest(unittest.TestCase):
         for command, patched in self.patches.items():
             patched.stop()
 
+    def _assertCommand(self, fabric_command, expected, called=True):
+        "Search the Fabric command calls for a given command."
+        mocked = self.mocks[fabric_command]
+        self.assertTrue(mocked.called, "%s was never called." % fabric_command)
+        commands = []
+        for args, kwargs in mocked.call_args_list:
+            commands.append(args[0])
+        found = any([command == expected for command in commands])
+        if called:
+            msg = "%s not found in %s" % (expected, commands)
+            self.assertTrue(found, msg)
+        else:
+            msg = "%s was found in %s" % (expected, commands)
+            self.assertFalse(found, msg)
+
     def assertSudoCommand(self, expected):
         "Assert sudo was called with a particular command."
-        sudo = self.mocks['sudo']
-        self.assertTrue(sudo.called)
-        args, kwargs = sudo.call_args
-        command = args[0]
-        self.assertEqual(command, expected)         
+        self._assertCommand('sudo', expected)
+
+    def assertNoSudoCommand(self, expected):
+        "Assert sudo was never called with a particular command."
+        self._assertCommand('sudo', expected, called=False)
+
+    def assertRunCommand(self, expected):
+        "Assert run was called with a particular command."
+        self._assertCommand('run', expected)
+
+    def assertNoRunCommand(self, expected):
+        "Assert run was never called with a particular command."
+        self._assertCommand('run', expected, called=False)

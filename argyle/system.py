@@ -111,6 +111,7 @@ def add_sources_from_file(file_name, update=True):
 def create_user(name, groups=None, key_file=None):
     """Create a user. Adds a key file to authorized_keys if given."""
 
+    groups = groups or []
     if not user_exists(name):
         for group in groups:
             if not group_exists(group):

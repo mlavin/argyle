@@ -112,5 +112,98 @@ class PackageCommandsTest(ArgyleTest):
                 self.assertEqual(update.call_count, 1)
 
 
+class UserCommandsTest(ArgyleTest):
+    "User/group creation and existance tests."
+
+    package = 'argyle.system'
+    patched_commands = ['run', 'sudo', 'put', 'files', ]
+
+    def test_user_exists_command(self):
+        "Check if a user exists by checking /etc/passwd."
+        system.user_exists('postgres')
+        self.assertRunCommand('grep ^postgres /etc/passwd')
+
+    def test_user_exists_value(self):
+        "user_exists return value should depend on the result of grep."
+        run = self.mocks['run']
+        run.return_value = True
+        self.assertTrue(system.user_exists('postgres'))
+        run.return_value = False
+        self.assertFalse(system.user_exists('postgres'))
+        
+    def test_group_exists_command(self):
+        "Check if a group exists by checking /etc/group."
+        system.group_exists('admin')
+        self.assertRunCommand('grep ^admin /etc/group')
+
+    def test_group_exists_value(self):
+        "group_exists return value should depend on the result of grep."
+        run = self.mocks['run']
+        run.return_value = True
+        self.assertTrue(system.group_exists('admin'))
+        run.return_value = False
+        self.assertFalse(system.group_exists('admin'))
+
+    def test_simple_create_user(self):
+        "Create new user without any groups."
+        with patch('argyle.system.user_exists') as exists:
+            exists.return_value = False
+            system.create_user('foo')
+            # Create user
+            self.assertSudoCommand('useradd -m  -s /bin/bash foo')
+            # Disable password
+            self.assertSudoCommand('passwd -d foo')
+
+    def test_user_already_exists(self):
+        "Don't try to create users which already exist."
+        with patch('argyle.system.user_exists') as exists:
+            exists.return_value = True
+            system.create_user('foo')
+            sudo = self.mocks['sudo']
+            self.assertFalse(sudo.called)
+
+    def test_create_user_with_new_groups(self):
+        "Create groups which don't exist and add the user to them."
+        with patch('argyle.system.user_exists') as user_exists:
+            with patch('argyle.system.group_exists') as group_exists:
+                user_exists.return_value = False
+                group_exists.return_value = False
+                system.create_user('foo', groups=['admin', 'ssh'])
+                # Create groups
+                self.assertSudoCommand('addgroup admin')
+                self.assertSudoCommand('addgroup ssh')
+                # Create user
+                self.assertSudoCommand('useradd -m -G admin,ssh -s /bin/bash foo')
+        
+    def test_create_user_with_existing_groups(self):
+        "No need to create groups which already exist."
+        with patch('argyle.system.user_exists') as user_exists:
+            with patch('argyle.system.group_exists') as group_exists:
+                user_exists.return_value = False
+                group_exists.return_value = True
+                system.create_user('foo', groups=['admin', 'ssh'])
+                # Create groups
+                self.assertNoSudoCommand('addgroup admin')
+                self.assertNoSudoCommand('addgroup ssh')
+                # Create user
+                self.assertSudoCommand('useradd -m -G admin,ssh -s /bin/bash foo')
+
+    def test_create_user_with_key_file(self):
+        "Create a user and push a key file to the remote."
+        key_file = 'foo/key.pub'
+        with patch('argyle.system.user_exists') as exists:
+            exists.return_value = False
+            system.create_user('foo', key_file=key_file)
+            # Create remote ssh directory and set permissions
+            self.assertSudoCommand('mkdir -p /home/foo/.ssh')
+            self.assertSudoCommand('chown -R foo /home/foo/.ssh')
+            put = self.mocks['put']
+            self.assertTrue(put.called)
+            args, kwargs = put.call_args
+            file_name, remote_path = args
+            self.assertEqual(file_name, key_file)
+            self.assertEqual(remote_path, '/home/foo/.ssh/authorized_keys')
+
+
 if __name__ == '__main__':
     unittest.main()
