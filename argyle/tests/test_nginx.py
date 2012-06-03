@@ -60,5 +60,41 @@ class EnableDisableSitesTest(NginxTest):
         self.assertFalse(self.mocks['restart_service'].called)
 
 
+class UploadSiteTest(NginxTest):
+    "Upload site configuration via template."
+
+    def test_default_upload(self):
+        "Upload default site configuration."
+        with patch('argyle.nginx.enable_site') as enable:
+            nginx.upload_nginx_site_conf('test')
+            # No additional context by default
+            self.assertTemplateContext(None)
+            # Upload template will look for templates in the given order
+            self.assertTemplateUsed([u'nginx/test.conf', u'nginx/site.conf'])
+            self.assertTemplateDesination('/etc/nginx/sites-available/test')
+            # Site will be enabled by default
+            self.assertTrue(enable.called)
+
+    def test_explicit_template_name(self):
+        "Override template name for upload."
+        with patch('argyle.nginx.enable_site') as enable:
+            nginx.upload_nginx_site_conf('test', template_name='test.conf')
+            # Upload template will look for templates in the given order
+            self.assertTemplateUsed('test.conf')
+            self.assertTemplateDesination('/etc/nginx/sites-available/test')
+
+    def test_additional_context(self):
+        "Pass additional context to the template."
+        with patch('argyle.nginx.enable_site') as enable:
+            nginx.upload_nginx_site_conf('test', context={'foo': 'bar'})
+            self.assertTemplateContext({'foo': 'bar'})
+
+    def test_upload_without_enabling(self):
+        "Upload site configuration but don't enable."
+        with patch('argyle.nginx.enable_site') as enable:
+            nginx.upload_nginx_site_conf('test', enable=False)
+            self.assertFalse(enable.called)
+
+
 if __name__ == '__main__':
     unittest.main()

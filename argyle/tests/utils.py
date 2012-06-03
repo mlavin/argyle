@@ -74,3 +74,11 @@ class ArgyleTest(unittest.TestCase):
         args, kwargs = upload_template.call_args
         destination = args[1]
         self.assertEqual(destination, expected)
+
+    def assertTemplateContext(self, expected):
+        "Assert addition context passed to an uploaded template."
+        upload_template = self.mocks['upload_template']
+        self.assertTrue(upload_template.called, "upload_template was never called.")
+        args, kwargs = upload_template.call_args
+        context = kwargs['context']
+        self.assertEqual(context, expected)
