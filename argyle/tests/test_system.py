@@ -1,16 +1,21 @@
 import os
 
+from fabric.api import settings
 from mock import patch
 
 from .utils import unittest, ArgyleTest
 from argyle import system
 
 
-class PackageCommandsTest(ArgyleTest):
-    "Package management (install, update, etc) commands."
+class SystemTest(ArgyleTest):
+    "Base for setting up necessary patches."
 
     package = 'argyle.system'
     patched_commands = ['run', 'sudo', 'put', 'files', ]
+
+
+class PackageCommandsTest(SystemTest):
+    "Package management (install, update, etc) commands."
 
     def test_install_single_package(self):
         "Install a single package throuh apt."
@@ -112,11 +117,8 @@ class PackageCommandsTest(ArgyleTest):
                 self.assertEqual(update.call_count, 1)
 
 
-class UserCommandsTest(ArgyleTest):
+class UserCommandsTest(SystemTest):
     "User/group creation and existance tests."
-
-    package = 'argyle.system'
-    patched_commands = ['run', 'sudo', 'put', 'files', ]
 
     def test_user_exists_command(self):
         "Check if a user exists by checking /etc/passwd."
@@ -203,6 +205,45 @@ class UserCommandsTest(ArgyleTest):
             file_name, remote_path = args
             self.assertEqual(file_name, key_file)
             self.assertEqual(remote_path, '/home/foo/.ssh/authorized_keys')
+
+
+class ServiceCommandsTest(SystemTest):
+    "Commands for starting/stoping services."
+
+    def test_default_service_command(self):
+        "Default start/stop via init.d."
+        system.service_command('nginx', 'start')
+        self.assertSudoCommand('/etc/init.d/nginx start')
+        
+    def test_service_command_template(self):
+        "Change how commands are called via ARGYLE_SERVICE_COMMAND_TEMPLATE."
+        with settings(ARGYLE_SERVICE_COMMAND_TEMPLATE="invoke-rc.d %(name)s %(command)s"):
+            system.service_command('nginx', 'start')
+            self.assertSudoCommand('invoke-rc.d nginx start')
+        
+    def test_start_service(self):
+        "Start is thin wrappers around service_command."
+        with patch('argyle.system.service_command') as service_command:
+            system.start_service('nginx')
+            self.assertTrue(service_command.called)
+            args, kwargs = service_command.call_args
+            self.assertEqual(list(args), ['nginx', 'start'])
+
+    def test_stop_service(self):
+        "Stop is thin wrappers around service_command."
+        with patch('argyle.system.service_command') as service_command:
+            system.stop_service('nginx')
+            self.assertTrue(service_command.called)
+            args, kwargs = service_command.call_args
+            self.assertEqual(list(args), ['nginx', 'stop'])
+
+    def test_restart_service(self):
+        "Restart is thin wrappers around service_command."
+        with patch('argyle.system.service_command') as service_command:
+            system.restart_service('nginx')
+            self.assertTrue(service_command.called)
+            args, kwargs = service_command.call_args
+            self.assertEqual(list(args), ['nginx', 'restart'])
 
 
 if __name__ == '__main__':
