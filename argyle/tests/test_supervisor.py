@@ -128,5 +128,23 @@ class GunicornConfigurationTest(SupervisorTest):
         self.assertTemplateDesination(u'/etc/supervisor/conf.d/server-2.conf')
 
 
+class DisableAppTest(SupervisorTest):
+    "Disabling process managed by supervisor."
+
+    def test_disable_site(self):
+        "Remove an supervisor configuration from conf.d."
+        self.mocks['files'].exists.return_value = True
+        supervisor.remove_supervisor_app('foo')
+        self.assertSudoCommand('rm /etc/supervisor/conf.d/foo.conf')
+        # Update configuration
+        self.assertSudoCommand('supervisorctl update')
+
+    def test_disable_site_already_removed(self):
+        "Ignore removing a configuration if it is already removed."
+        self.mocks['files'].exists.return_value = False
+        supervisor.remove_supervisor_app('foo')
+        self.assertFalse(self.mocks['sudo'].called)
+
+
 if __name__ == '__main__':
     unittest.main()
