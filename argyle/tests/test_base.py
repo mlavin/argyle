@@ -73,6 +73,45 @@ class UploadTemplateTest(ArgyleTest):
             args, kwargs = put.call_args
             self.assertEqual(kwargs['remote_path'], '/tmp/foo.txt')
 
+    def test_destination_test(self):
+        "Check if destination is a directory for constucting destination filename."
+        with patch('argyle.base.Environment') as mock_environment:
+            upload_template('foo.txt', '/tmp/')
+            self.assertRunCommand('test -d /tmp/')
+
+    def test_destination_test_sudo(self):
+        "Destination check will use sudo if the upload requires sudo."
+        with patch('argyle.base.Environment') as mock_environment:
+            upload_template('foo.txt', '/tmp/', use_sudo=True)
+            self.assertSudoCommand('test -d /tmp/')
+
+    def test_destination_filename(self):
+        "If destination is a direction use file name from template."
+        run = self.mocks['run']
+        result = Mock()
+        result.succeeded = False # Not a directory
+        run.return_value = result
+        with patch('argyle.base.Environment') as mock_environment:
+            upload_template('foo.txt', '/tmp/bar.txt')
+            put = self.mocks['put']
+            self.assertTrue(put.called)
+            args, kwargs = put.call_args
+            self.assertEqual(kwargs['remote_path'], '/tmp/bar.txt')
+
+    def test_upload_tempalte_list(self):
+        "Filename can be a list of filename for get_or_select_template."
+        with patch('argyle.base.Environment') as mock_environment:
+            mock_env = Mock()
+            mock_template = Mock()
+            mock_template.filename = 'bar.txt' # Second template is used
+            mock_env.get_or_select_template.return_value = mock_template
+            mock_environment.return_value = mock_env
+            upload_template(['foo.txt', 'bar.txt'] , '/tmp/')
+            put = self.mocks['put']
+            self.assertTrue(put.called)
+            args, kwargs = put.call_args
+            self.assertEqual(kwargs['remote_path'], '/tmp/bar.txt')
+
     def test_use_sudo(self):
         "Use sudo should be used for putting template on the server."
         with patch('argyle.base.Environment') as mock_environment:
