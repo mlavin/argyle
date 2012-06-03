@@ -7,14 +7,12 @@ from .utils import unittest, ArgyleTest
 from argyle.base import upload_template
 
 
-@patch('argyle.base.files')
-@patch('argyle.base.put')
-@patch('argyle.base.sudo')
-@patch('argyle.base.run')
-@patch('argyle.base.local')
 class UploadTemplateTest(ArgyleTest):
 
-    def test_default_jinja_loader(self, *args):
+    package = 'argyle.base'
+    patched_commands = ['local', 'run', 'sudo', 'put', 'files', ]
+
+    def test_default_jinja_loader(self):
         "The default template are loaded from the argyle package."
         with patch('argyle.base.Environment') as mock_environment:
             upload_template('foo.txt', '/tmp/')
@@ -25,7 +23,7 @@ class UploadTemplateTest(ArgyleTest):
             self.assertEqual(len(loader.loaders), 1)
             self.assertTrue(isinstance(loader.loaders[0], jinja2.PackageLoader))
 
-    def test_additional_template_directories(self, *args):
+    def test_additional_template_directories(self):
         "Additional template directories should come before defaults."
         with settings(ARGYLE_TEMPLATE_DIRS=('tests/templates', )):
             with patch('argyle.base.Environment') as mock_environment:
@@ -37,7 +35,7 @@ class UploadTemplateTest(ArgyleTest):
                 self.assertEqual(len(loader.loaders), 2)
                 self.assertTrue(isinstance(loader.loaders[0], jinja2.FileSystemLoader))
         
-    def test_default_template_context(self, *args):
+    def test_default_template_context(self):
         "The fabric env should be the default template context."
         with patch('argyle.base.Environment') as mock_environment:
             mock_env = Mock()
@@ -50,7 +48,7 @@ class UploadTemplateTest(ArgyleTest):
             context = args[0]
             self.assertEqual(context, env)
 
-    def test_additional_template_context(self, *args):
+    def test_additional_template_context(self):
         "Additional template context should be passed to the template render."
         with patch('argyle.base.Environment') as mock_environment:
             mock_env = Mock()
@@ -66,18 +64,21 @@ class UploadTemplateTest(ArgyleTest):
             expected.update(extra)
             self.assertEqual(context, expected)
 
-    def test_destination(self, local, run, sudo, put, files):
+    def test_destination(self):
         "Destination should be used for putting template on the server."
         with patch('argyle.base.Environment') as mock_environment:
             upload_template('foo.txt', '/tmp/')
+            put = self.mocks['put']
             self.assertTrue(put.called)
             args, kwargs = put.call_args
             self.assertEqual(kwargs['remote_path'], '/tmp/foo.txt')
 
-    def test_use_sudo(self, local, run, sudo, put, files):
+    def test_use_sudo(self):
         "Use sudo should be used for putting template on the server."
         with patch('argyle.base.Environment') as mock_environment:
             upload_template('foo.txt', '/tmp/', use_sudo=True)
+            put = self.mocks['put']
+            sudo = self.mocks['sudo']
             self.assertTrue(put.called)
             self.assertTrue(sudo.called)
             args, kwargs = put.call_args
