@@ -58,3 +58,19 @@ class ArgyleTest(unittest.TestCase):
     def assertNoRunCommand(self, expected):
         "Assert run was never called with a particular command."
         self._assertCommand('run', expected, called=False)
+
+    def assertTemplateUsed(self, expected):
+        "Assert tempate used in an upload_template call."
+        upload_template = self.mocks['upload_template']
+        self.assertTrue(upload_template.called, "upload_template was never called.")
+        args, kwargs = upload_template.call_args
+        template_name = args[0]
+        self.assertEqual(template_name, expected)
+
+    def assertTemplateDesination(self, expected):
+        "Assert location for uploaded template."
+        upload_template = self.mocks['upload_template']
+        self.assertTrue(upload_template.called, "upload_template was never called.")
+        args, kwargs = upload_template.call_args
+        destination = args[1]
+        self.assertEqual(destination, expected)

@@ -122,5 +122,46 @@ class DetectVersionTest(PostgresTest):
             self.assertTrue(abort.called)
 
 
+class HbaConfigTest(PostgresTest):
+    "Upload pg_hba.conf to the remote."
+
+    def test_default_upload(self):
+        "Upload default template."
+        with patch('argyle.postgres.detect_version') as version:
+            version.return_value = '9.1'
+            postgres.upload_pg_hba_conf()
+            self.assertTemplateUsed(u'postgres/pg_hba.conf')
+            self.assertTemplateDesination(u'/etc/postgresql/9.1/main/pg_hba.conf')
+            # Version is detected if not given
+            self.assertTrue(version.called)
+            # Restart is called
+            restart_service = self.mocks['restart_service']
+            self.assertTrue(restart_service.called)
+            args, kwargs = restart_service.call_args
+            self.assertEqual(args[0], 'postgresql')
+
+    def test_configure_cluster(self):
+        "Upload default template to alternate cluster location."
+        with patch('argyle.postgres.detect_version') as version:
+            version.return_value = '9.1'
+            postgres.upload_pg_hba_conf(pg_cluster='other')
+            self.assertTemplateDesination(u'/etc/postgresql/9.1/other/pg_hba.conf')
+
+    def test_set_version(self):
+        "Version is used and not detected if given."
+        with patch('argyle.postgres.detect_version') as version:
+            postgres.upload_pg_hba_conf(pg_version='8.4')
+            self.assertTemplateDesination(u'/etc/postgresql/8.4/main/pg_hba.conf')
+            self.assertFalse(version.called)
+
+    def test_no_restart(self):
+        "Option parameter to not restart postgres after upload."
+        with patch('argyle.postgres.detect_version') as version:
+            version.return_value = '9.1'
+            postgres.upload_pg_hba_conf(restart=False)
+            restart_service = self.mocks['restart_service']
+            self.assertFalse(restart_service.called)
+
+
 if __name__ == '__main__':
     unittest.main()
