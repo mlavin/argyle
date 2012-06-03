@@ -72,5 +72,55 @@ class CreateUserTest(PostgresTest):
         self.assertSudoCommand('psql  -c "ALTER USER foo WITH PASSWORD \'bar\'"')
 
 
+class CreateDBTest(PostgresTest):
+    "Create databases on the Postgres server."
+    
+    def test_database_defaults(self):
+        "Create database with default flags."
+        postgres.create_db('foo')
+        self.assertSudoCommand('createdb -E UTF-8 foo')
+        # Command should use the postgres user
+        sudo = self.mocks['sudo']
+        args, kwargs = sudo.call_args
+        user = kwargs.get('user', None)
+        self.assertEqual(user, 'postgres')
+        
+    def test_database_owner(self):
+        "Set the owner of the database on creation."
+        postgres.create_db('foo', owner='bar')
+        self.assertSudoCommand('createdb -E UTF-8 -O bar foo')
+
+    def test_database_encoding(self):
+        "Change the encoding when creating the database."
+        postgres.create_db('foo', encoding='LATIN1')
+        self.assertSudoCommand('createdb -E LATIN1 foo')
+
+
+class DetectVersionTest(PostgresTest):
+    "Attempt to detect Postgres version running on the server."
+
+    def test_check_run_output(self):
+        "Detect via psql --version output."
+        run = self.mocks['run']
+        run.return_value = 'psql (PostgreSQL) 9.1.3'
+        postgres.detect_version()
+        self.assertRunCommand('psql --version')
+
+    def test_parse_version(self):
+        "Returns the parsed major and minor version number."
+        run = self.mocks['run']
+        run.return_value = 'psql (PostgreSQL) 9.1.3'
+        version = postgres.detect_version()
+        self.assertEqual(version, '9.1')
+
+    def test_parse_failed(self):
+        "Abort command on parse failure."
+        run = self.mocks['run']
+        run.return_value = ''
+        with patch('argyle.postgres.abort') as abort:
+            postgres.detect_version()
+            self.assertTrue(abort.called)
+
+
 if __name__ == '__main__':
     unittest.main()

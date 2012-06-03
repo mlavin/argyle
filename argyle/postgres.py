@@ -69,6 +69,7 @@ def upload_pg_hba_conf(template_name=None, pg_version=None, pg_cluster='main', r
 def detect_version():
     """Parse the output of psql to detect Postgres version."""
     version_regex = re.compile(r'\(PostgreSQL\) (?P<major>\d)\.(?P<minor>\d)\.(?P<bugfix>\d)')
+    pg_version = None
     with hide('running', 'stdout', 'stderr'):
         output = run('psql --version')
     match = version_regex.search(output)
