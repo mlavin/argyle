@@ -20,6 +20,10 @@ This code is based on code from `Lincoln Loop <http://lincolnloop.com/blog/2009/
 and `paramiko issue <https://bugs.launchpad.net/paramiko/+bug/483697>`_ for adding
 support for agent forwarding.
 
+.. note::
+
+    This issue has been fixed in Fabric 1.4.
+
 
 .. _upload_template:
 

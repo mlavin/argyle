@@ -66,6 +66,22 @@ single package name per line. The file is read from the local filesystem not the
 remote.
 
 
+add_apt_source
+-----------------------------------
+
+Adds a source to /etc/apt/sources.list. There is an optional ``key`` parameter
+which is the url to the key. If given it will be fetched and added via ``apt-key add``.
+
+
+add_sources_from_file
+-----------------------------------
+
+A wrapper around ``add_apt_source`` which parses a list of source/key pairs
+from a file. The format is::
+
+    deb http://example.com/deb lucid main (http://example.com/key)
+
+
 create_user
 -----------------------------------
 
