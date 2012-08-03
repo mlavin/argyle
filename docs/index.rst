@@ -17,6 +17,7 @@ Contents
     nginx.rst
     postgres.rst
     supervisor.rst
+    rabbitmq.rst
     settings.rst
     changelog.rst
 
