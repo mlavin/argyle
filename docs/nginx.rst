@@ -1,8 +1,7 @@
 Nginx Functions
 ======================================
 
-Nginx is an awesome webserver and these are functions to help manage site
-configurations.
+Tasks for configuring sites running under the Nginx webserver.
 
 
 .. function:: remove_default_site()
