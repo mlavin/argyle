@@ -15,6 +15,7 @@ Contents
     base.rst
     system.rst
     nginx.rst
+    postgres.rst
     settings.rst
     changelog.rst
 
