@@ -14,6 +14,7 @@ Contents
     motivation.rst
     base.rst
     system.rst
+    nginx.rst
     settings.rst
     changelog.rst
 
