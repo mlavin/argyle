@@ -13,7 +13,7 @@ def npm_install(package, flags=None):
     """Install a package from NPM."""
 
     command = u'install %s %s' % (package, flags or u'') 
-    npm_command(command)
+    npm_command(command.strip())
 
 
 @task
@@ -25,7 +25,7 @@ def npm_uninstall(package):
 
 
 @task
-def npm_updated(package):
+def npm_update(package):
     """Update a package from NPM."""
 
     command = u'update %s' % package
