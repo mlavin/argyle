@@ -2,7 +2,12 @@ Argyle
 ==============================
 
 Argyle is a collection of Fabric utilities for Django deployment. This project
-is still in very early phases. It is not recommend for production usage.
+is still in very early phases.
+
+.. image::
+    https://secure.travis-ci.org/mlavin/argyle.png?branch=master
+    :alt: Build Status
+        :target: https://secure.travis-ci.org/mlavin/argyle
 
 
 Requirements
