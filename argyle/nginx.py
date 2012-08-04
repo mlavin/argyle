@@ -1,5 +1,5 @@
 from argyle.base import upload_template
-from argyle.system import start_service, stop_service, restart_service
+from argyle.system import restart_service
 from fabric.api import abort, sudo, task
 from fabric.contrib import files
 
@@ -8,9 +8,7 @@ from fabric.contrib import files
 def remove_default_site():
     """Remove the default Nginx site if it exists."""
 
-    nginx_default = u'/etc/nginx/sites-enabled/default'
-    if files.exists(nginx_default):
-        sudo(u'rm %s' % nginx_default)
+    disable_site('default')
 
 
 @task

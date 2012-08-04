@@ -11,8 +11,8 @@ can be used by setting them in the Fabric environment
 ARGYLE_SERVICE_COMMAND_TEMPLATE
 --------------------------------------
 
-This settings configures the behavior of the system 
-:ref:`stop/start/restart tasks <service_command>`. This should be a string with 
+This settings configures the behavior of the system :py:func:`service_command`
+for the stop/start/restart tasks. This should be a string with 
 takes the formatting parameters ``name`` and ``command``.
 
 Default: ``u'/etc/init.d/%(name)s %(command)s'``
@@ -28,6 +28,6 @@ directory inside the argyle module. However, if you wish to override, extend or
 include additional templates you can include additional directories using
 this setting. Jinja will look for templates in any directories included here
 first before loading from the default template directory. See the 
-:ref:`upload_template` command for additional information on the usage.
+:py:func:`upload_template` command for additional information on the usage.
 
 Default: ``()``

@@ -69,6 +69,7 @@ def upload_pg_hba_conf(template_name=None, pg_version=None, pg_cluster='main', r
 def detect_version():
     """Parse the output of psql to detect Postgres version."""
     version_regex = re.compile(r'\(PostgreSQL\) (?P<major>\d)\.(?P<minor>\d)\.(?P<bugfix>\d)')
+    pg_version = None
     with hide('running', 'stdout', 'stderr'):
         output = run('psql --version')
     match = version_regex.search(output)
@@ -83,10 +84,10 @@ def detect_version():
 
 @task
 def reset_cluster(pg_cluster='main', pg_version=None, encoding=u'UTF-8'):
-    """Drop and restore a given cluster."""
-    version = pg_version or detect_version()
+    """Drop and restore a given cluster."""    
     warning = u'You are about to drop the %s cluster. This cannot be undone. Are you sure you want to continue?' % pg_cluster
     if confirm(warning, default=False):
+        version = pg_version or detect_version()
         config = {'version': version, 'cluster': pg_cluster, 'encoding': encoding}
         sudo(u'pg_dropcluster --stop %(version)s %(cluster)s' % config, user='postgres')
         sudo(u'pg_createcluster --start -e %(encoding)s %(version)s %(cluster)s' % config, user='postgres') 

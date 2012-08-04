@@ -1,4 +1,6 @@
 import os
+import sys
+
 from setuptools import setup, find_packages
 
 
@@ -10,6 +12,10 @@ def read_file(filename):
         return open(filepath).read()
     except IOError:
         return ''
+
+tests_require = ["mock", ]
+if sys.version_info < (2, 7):
+    tests_require.append("unittest2")
 
 
 setup(
@@ -28,9 +34,13 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python',
+        'Programming Language :: Python :: 2.6',
+        'Programming Language :: Python :: 2.7',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Development Status :: 4 - Beta',
         'Operating System :: OS Independent',
     ],
     long_description=read_file('README.rst'),
+    test_suite="argyle.tests",
+    tests_require=tests_require,
 )

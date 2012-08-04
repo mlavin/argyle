@@ -14,6 +14,11 @@ Contents
     motivation.rst
     base.rst
     system.rst
+    nginx.rst
+    postgres.rst
+    supervisor.rst
+    rabbitmq.rst
+    npm.rst
     settings.rst
     changelog.rst
 

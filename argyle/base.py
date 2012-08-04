@@ -35,11 +35,6 @@ def sshagent_run(cmd):
 def upload_template(filename, destination, context=None,
     use_sudo=False, backup=True, mode=None):
     func = use_sudo and sudo or run
-    # Normalize destination to be an actual filename, due to using StringIO
-    with settings(hide('everything'), warn_only=True):
-        if func('test -d %s' % destination).succeeded:
-            sep = "" if destination.endswith('/') else "/"
-            destination += sep + os.path.basename(filename)
     # Process template
     loaders = []
     template_dirs = getattr(env, 'ARGYLE_TEMPLATE_DIRS', ())
@@ -50,7 +45,18 @@ def upload_template(filename, destination, context=None,
     context = context or {}
     env_context = env.copy()
     env_context.update(context)
-    text = jenv.get_or_select_template(filename).render(env_context)
+    template = jenv.get_or_select_template(filename)
+    text = template.render(env_context)
+    # Normalize destination to be an actual filename, due to using StringIO
+    with settings(hide('everything'), warn_only=True):
+        if func('test -d %s' % destination).succeeded:
+            sep = "" if destination.endswith('/') else "/"
+            if hasattr(filename, '__iter__'):
+                # Use selected filename for destination
+                final = template.filename
+            else:
+                final = filename
+            destination += sep + os.path.basename(final)
     # Back up original file
     if backup and files.exists(destination):
         func("cp %s{,.bak}" % destination)
