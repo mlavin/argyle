@@ -1,6 +1,12 @@
 Release Notes
 ==================
 
+v0.2.1 (Released 2012-08-25)
+--------------------------------------
+
+- Fixed group permissions for newly created user's ssh directory
+
+
 v0.2 (Released 2012-08-03)
 --------------------------------------
 
