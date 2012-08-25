@@ -122,7 +122,7 @@ def create_user(name, groups=None, key_file=None):
     if key_file:
         sudo(u"mkdir -p /home/%s/.ssh" % name)
         put(key_file, u"/home/%s/.ssh/authorized_keys" % name, use_sudo=True)
-        sudo(u"chown -R %(name)s /home/%(name)s/.ssh" % {'name': name})
+        sudo(u"chown -R %(name)s:%(name)s /home/%(name)s/.ssh" % {'name': name})
 
 
 @task
