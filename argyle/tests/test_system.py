@@ -198,7 +198,7 @@ class UserCommandsTest(SystemTest):
             system.create_user('foo', key_file=key_file)
             # Create remote ssh directory and set permissions
             self.assertSudoCommand('mkdir -p /home/foo/.ssh')
-            self.assertSudoCommand('chown -R foo /home/foo/.ssh')
+            self.assertSudoCommand('chown -R foo:foo /home/foo/.ssh')
             put = self.mocks['put']
             self.assertTrue(put.called)
             args, kwargs = put.call_args
