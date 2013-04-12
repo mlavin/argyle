@@ -71,6 +71,13 @@ class CreateUserTest(PostgresTest):
         postgres.change_db_user_password('foo', 'bar')
         self.assertSudoCommand('psql  -c "ALTER USER foo WITH PASSWORD \'bar\'"')
 
+    def test_db_user_exists(self):
+        result = postgres.db_user_exists('foo')
+        cmd = 'psql -Aqt -c ' \
+              '"SELECT COUNT(*) FROM pg_roles where rolname = \'foo\';"'
+        self.assertSudoCommand(cmd)
+        self.assertFalse(result)
+
 
 class CreateDBTest(PostgresTest):
     "Create databases on the Postgres server."
@@ -94,6 +101,13 @@ class CreateDBTest(PostgresTest):
         "Change the encoding when creating the database."
         postgres.create_db('foo', encoding='LATIN1')
         self.assertSudoCommand('createdb -E LATIN1 foo')
+
+    def test_db_exists(self):
+        result = postgres.db_exists('foo')
+        cmd = 'psql -Aqt -c ' \
+              '"SELECT COUNT(*) FROM pg_database where datname = \'foo\';"'
+        self.assertSudoCommand(cmd)
+        self.assertFalse(result)
 
 
 class DetectVersionTest(PostgresTest):
@@ -183,7 +197,8 @@ class ResetClusterTest(PostgresTest):
                 version.return_value = '9.1'
                 postgres.reset_cluster()
                 self.assertSudoCommand('pg_dropcluster --stop 9.1 main')
-                self.assertSudoCommand('pg_createcluster --start -e UTF-8 9.1 main')
+                self.assertSudoCommand('pg_createcluster --start -e UTF-8 '
+                                       '--locale en_US.UTF-8 9.1 main')
 
     def test_configure_version(self):
         "Use given version without detection if given."
@@ -192,7 +207,8 @@ class ResetClusterTest(PostgresTest):
                 confirm.return_value = True
                 postgres.reset_cluster(pg_version='8.4')
                 self.assertSudoCommand('pg_dropcluster --stop 8.4 main')
-                self.assertSudoCommand('pg_createcluster --start -e UTF-8 8.4 main')
+                self.assertSudoCommand('pg_createcluster --start -e UTF-8 '
+                                       '--locale en_US.UTF-8 8.4 main')
                 self.assertFalse(version.called)
 
     def test_configure_cluster(self):
@@ -203,7 +219,8 @@ class ResetClusterTest(PostgresTest):
                 version.return_value = '9.1'
                 postgres.reset_cluster(pg_cluster='other')
                 self.assertSudoCommand('pg_dropcluster --stop 9.1 other')
-                self.assertSudoCommand('pg_createcluster --start -e UTF-8 9.1 other')
+                self.assertSudoCommand('pg_createcluster --start -e UTF-8 '
+                                       '--locale en_US.UTF-8 9.1 other')
 
     def test_configure_encoding(self):
         "Use given encoding when creating cluster."
@@ -213,7 +230,19 @@ class ResetClusterTest(PostgresTest):
                 version.return_value = '9.1'
                 postgres.reset_cluster(encoding='LATIN1')
                 self.assertSudoCommand('pg_dropcluster --stop 9.1 main')
-                self.assertSudoCommand('pg_createcluster --start -e LATIN1 9.1 main')
+                self.assertSudoCommand('pg_createcluster --start -e LATIN1 '
+                                       '--locale en_US.UTF-8 9.1 main')
+
+    def test_configure_locale(self):
+        "Use given locale when creating cluster."
+        with patch('argyle.postgres.confirm') as confirm:
+            with patch('argyle.postgres.detect_version') as version:
+                confirm.return_value = True
+                version.return_value = '9.1'
+                postgres.reset_cluster(locale='pt_BR.LATIN1')
+                self.assertSudoCommand('pg_dropcluster --stop 9.1 main')
+                self.assertSudoCommand('pg_createcluster --start -e UTF-8 '
+                                       '--locale pt_BR.LATIN1 9.1 main')
 
 
 if __name__ == '__main__':
