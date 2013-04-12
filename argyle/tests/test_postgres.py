@@ -109,6 +109,10 @@ class CreateDBTest(PostgresTest):
         self.assertSudoCommand(cmd)
         self.assertFalse(result)
 
+    def test_db_template(self):
+        # Can create db from a different template
+        postgres.create_db('foo', template='George')
+        self.assertSudoCommand('createdb -E UTF-8 --template=George foo')
 
 class DetectVersionTest(PostgresTest):
     "Attempt to detect Postgres version running on the server."
