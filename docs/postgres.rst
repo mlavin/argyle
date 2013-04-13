@@ -21,9 +21,13 @@ Tasks for managing clusters, databases, users and configurations for a Postgres 
     passed to ``sudo`` or ``run``.
 
 
-.. function:: create_db(name, owner=None, encoding=u'UTF-8')
+.. function:: create_db(name, owner=None, encoding=u'UTF-8', template='template1')
 
     Creates a new database with a given owner (if given) and encoding.
+    You can specify which database is copied to create the new one
+    with the ``template`` parameter. Using ``'template0'`` as the
+    template will allow creating a database with a different encoding
+    from the default, which can't be done from ``template1``.
 
 .. function:: db_exists(name)
 

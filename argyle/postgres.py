@@ -71,7 +71,8 @@ def change_db_user_password(username, password):
 
 
 @task
-def create_db(name, owner=None, encoding=u'UTF-8', **kwargs):
+def create_db(name, owner=None, encoding=u'UTF-8', template='template1',
+              **kwargs):
     """Create a Postgres database."""
 
     flags = u''
@@ -79,6 +80,8 @@ def create_db(name, owner=None, encoding=u'UTF-8', **kwargs):
         flags = u'-E %s' % encoding
     if owner:
         flags = u'%s -O %s' % (flags, owner)
+    if template and template != 'template1':
+        flags = u'%s --template=%s' % (flags, template)
     sudo('createdb %s %s' % (flags, name), user='postgres', **kwargs)
 
 
