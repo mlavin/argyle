@@ -20,6 +20,13 @@ These tasks were written primarily for deployments on Ubuntu Linux. Your
 mileage may vary with other operating systems and flavors of Linux.
 
 
+Documentation
+--------------------------------------
+
+Additional documentation on using argyle is available on
+`Read The Docs <http://argyle.readthedocs.org/>`_.
+
+
 Questions or Issues?
 -------------------------------
 
